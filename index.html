@@ -252,6 +252,148 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://royite.com/2019/02/13/Block/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Roy Ren">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="向东">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/02/13/Block/" itemprop="url">Block</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-02-13T21:48:22+08:00">
+                2019-02-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Block"><a href="#Block" class="headerlink" title="Block"></a>Block</h2><h4 id="简介（Objective-C）："><a href="#简介（Objective-C）：" class="headerlink" title="简介（Objective-C）："></a>简介（Objective-C）：</h4><p>声明block需要使用<code>^</code>(脱字)字符<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int (^MyBlock) (int paramater1, double parameter2);</span><br></pre></td></tr></table></figure></p>
+<p>这种结构声明了一个叫做<code>MyBlock</code>的block，该block接受一个<code>int</code>类型和一个<code>double</code>类型的参数，返回值是一个<code>int</code>型。<br>大部分情况下会使用<code>typedef</code>来定义一个block如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef int (^MyBlock) (int paramater1, double parameter2);</span><br></pre></td></tr></table></figure></p>
+<p>这样就可以想其他数据类型一样声明block的实例了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MyBlock firstBlock, secondBlock;</span><br></pre></td></tr></table></figure></p>
+<p>可以这样给block赋值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">firstBlock = ^(int paramater1, double parameter2) &#123;</span><br><span class="line">    // block中的代码</span><br><span class="line">    NSLog(@&quot;%d, %f&quot;, paramater1, parameter2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该block接受一个<code>int</code>类型和一个<code>double</code>类型的参数，因此可以这样调用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firstBlock(2, 3.5);</span><br></pre></td></tr></table></figure></p>
+<p>这样调用，该block会用NSLog将参数输出到控制台；</p>
+<h3 id="变量作用域"><a href="#变量作用域" class="headerlink" title="变量作用域"></a>变量作用域</h3><p>block有别于函数指针的一点是它可以在词法作用域中访问变量。block也可以在词法作用域中修改变量，即使变量本身已经超出了作用域。为了让block在词法作用域中访问变量，Objective-C的运行时环境需要在栈上分配block。</p>
+<p>当把block作为参数传递给别的方法时，实际上实在堆上复制了该block，这是因为作为参数传递时，block会在它最初创建时所在的栈被释放后才被调用。普通的Objective-C复制消息来复制block，这么做也会导致block的词法作用域中的变量被复制或保留。</p>
+<blockquote>
+<p>block不能被保留。给block发送保留消息是无效操作，并不会增加引用计数。通常不用明确地发送保留消息。但把block声明为属性是，需要留心所用的修饰关键字。</p>
+</blockquote>
+<h3 id="堆与栈"><a href="#堆与栈" class="headerlink" title="堆与栈"></a>堆与栈</h3><p>block是一种特殊的Objective-C对象。跟传统的对象不同的是，block不是在堆上创建的。主要因为：</p>
+<ol>
+<li>性能：在栈上分配空间几乎总是比堆上快；</li>
+<li>出于访问其他局部变量的需要。</li>
+</ol>
+<p>但是当函数的作用域结束时，栈会被销毁。如果快被传递给一个方法，此方法即使在自己的作用域销毁后也需要用到这个block，那你就应该复制block。Objective-C的运行时环境会在block呗复制时把它从栈移动到堆上。在block引用作用域中的局部变量时，局部变量也会随着快一起移动。所有被引用的NSObject的子类对象都会被保留而不是复制（因为对象本身就已经在堆上了，而保留的耗时比复制要少）。Objective-C的运行时环境为block创建每个局部变量的常量引用（const instance）。这意味着默认情况下block不能修改上下文数据，如下代码可能会导致编译错误：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int statusCode = -1;</span><br><span class="line">MyBlock b = ^&#123;</span><br><span class="line">    statusCode = 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>但是block是可以修改局部变量的，怎么才能修改呢？需要使用<code>__block</code>修饰符来声明变量，所以正确的声明应该如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__block int statusCode = -1;</span><br></pre></td></tr></table></figure></p>
+<p><code>__block</code>修饰符是为了命令编译器当block被复制时，将block中引用的使用<code>__block</code>修饰的变量复制过去，复制是比保留呵传递常量引用更耗时的操作，所以系统把这个选择权交给了开发者；</p>
+<blockquote>
+<p><code>__block</code>被复制而不是保留</p>
+</blockquote>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://royite.com/2018/12/27/Swift/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -323,7 +465,19 @@
       
         
           
-            <h2 id="Hello-Swift"><a href="#Hello-Swift" class="headerlink" title="Hello Swift"></a>Hello Swift</h2>
+            <h2 id="Hello-Swift-Have-a-nice-Day"><a href="#Hello-Swift-Have-a-nice-Day" class="headerlink" title="Hello Swift Have a nice Day"></a>Hello Swift Have a nice Day</h2><blockquote>
+<p>royite.com</p>
+</blockquote>
+<p>use the <code>print</code><br><code>have a nice da
+  pring</code><br>  <code>func</code></p>
+<h1 id="title"><a href="#title" class="headerlink" title="title"></a>title</h1><pre><code>func () {
+    print(&quot;current thread&quot;)
+    print
+
+    return
+}
+</code></pre><p><img src="./images/block-capture-1.jpg" alt=""></p>
+
           
         
       
@@ -532,7 +686,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
